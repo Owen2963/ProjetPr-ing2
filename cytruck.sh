@@ -10,7 +10,6 @@ do
 			exit
 	fi
 done
-n=0
 t='temp'
 if [ -e $h ] ;	then
 	echo -n `rm -r temp && mkdir temp`
@@ -24,10 +23,16 @@ else
 	echo -n `mkdir image`
 fi
 
-d='data.csv'
-d1(){
-	f=`cat  data.csv | head -n+10 | tail -9 | cut -d';' -f6`
-	echo $f
-}
+#d1(){
+	#for i in $ligne ; do
+	#	if [ 'Laura NAVARRO' == $i ] ; then
+	#		a=$((a+1))
+	#	fi
+	#done
+	#echo -e $a
+#}
 
-echo $(d1)
+`touch temp1`
+f=`head -10 data.csv | cut -d';' -f6 > temp1`
+ligne=`read temp1`
+echo $ligne
