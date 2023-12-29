@@ -6,7 +6,7 @@ else
 fi
 if [ -e 'image' ] ;	then
 	echo -n `rm -r image && mkdir image`
-else
+els
 	echo -n `mkdir image`
 fi
 
