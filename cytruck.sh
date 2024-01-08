@@ -11,9 +11,12 @@ else
 fi
 
 d1(){
-	`awk -F";" '{print $6}' data.csv | sort -r | uniq -c > temp/temp1`
-	`sort -r -n temp/temp1 > temp/temp2`
-	#`sort -r -n -t' ' -k3 temp2 | head -10`
+	`awk -F";" '{print $6}' data.csv | sort -r | uniq -c > temp/temp1.txt&&awk '{print $1" "$2","$3}' temp/temp1.txt | sort -r -n | head -10 > temp/temp11.txt`
+	`gnuplot 'cyt1.gnu'`
+}
+
+d2(){
+	`awk -F";" '{print $5" "$6}' data.csv | tail +2 > temp/temp2.txt&&awk '{while(($2==p)&&($3==n)) d+=$1} {p=$2;n=$3} {print d" "p" "n}' temp/temp2.txt | sort -r -n | head -10 > temp/temp22.txt`
 }
 
 if [ 'data.csv' == $1 ] ; then
@@ -27,10 +30,11 @@ if [ 'data.csv' == $1 ] ; then
 			option -t  : les 10 villes les plus traversées
 			option -s  : statistiques sur les étapes"
 			elif [ '-d1' == $i ] ; then
-				echo `time d1` 
-			fi
+				`time d1`
+			elif [ '-d2' == $i ] ; then
+				`time d2`
+		fi
 	done
 else 
 	echo "Le fichier data.csv doit être le premier argument"
 fi
-
