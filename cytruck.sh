@@ -12,7 +12,7 @@ fi
 
 d1(){
 	`awk -F";" '{print $6}' data.csv | sort -r | uniq -c > temp/temp1.txt&&awk '{print $1" "$2","$3}' temp/temp1.txt | sort -r -n | head -10 > temp/temp11.txt`
-	`gnuplot 'cyt1.gnu'`
+	`gnuplot 'd1.gnu'`
 }
 
 d2(){
