@@ -16,8 +16,13 @@ d1(){
 }
 
 d2(){
-	`awk -F";" '{print $5" "$6}' data.csv | tail +2 | sort -k2 > temp/temp2.txt&&awk '{if(($2==p)&&($3==n)) d+=$1; else d=$1} {p=$2;n=$3} {print d" "p" "n}' temp/temp2.txt > temp/temp22.txt&&awk '{if(($2==p)&&($3==n)) ; else print d";"p" "n;} {d=$1;p=$2;n=$3}' temp/temp22.txt | sort -r -n | head -10 > temp/temp222.txt`
+	`awk -F";" '{print $5" "$6}' data.csv | tail +2 | sort -k2 > temp/temp2.txt&&awk '{if(($2==p)&&($3==n)) d+=$1; else d=$1} {p=$2;n=$3} {print d" "p" "n}' temp/temp2.txt > temp/temp22.txt&&awk '{if(($2==p)&&($3==n)) ; else print d";"p" "n;} {d=$1;p=$2;n=$3}' temp/temp22.txt | sort -r -n | head -10 > temp/temp2.txt`
 	`gnuplot 'd2.gnu'`
+}
+
+l(){
+	`awk -F";" '{print $1";"$2";"$3" "$4";"$5}' data.csv | tail +2 | sort -t';' -k3 > temp/templ.txt&&awk -F";" '{if(($3==p)) (e+=$2)&&(l+=$4); else (e=$2)&&(l=$4)} {p=$3} {print $1";"e";"p";"l}' temp/templ.txt > temp/templl.txt&&awk -F";" '{if(c!=$3) print a";"b";"c";"d} {a=$1;b=$2;c=$3;d=$4}' temp/templl.txt | sort -t';' -k4 -n -r | head -10 > temp/templ.txt&&sort -t';' -k1 -n temp/templ.txt > temp/templl.txt`
+	`gnuplot 'l.gnu'`
 }
 
 if [ 'data.csv' == $1 ] ; then
@@ -37,6 +42,10 @@ if [ 'data.csv' == $1 ] ; then
 			elif [ '-d2' == $i ] ; then
 				echo "temps d2:"
 				`time d2`
+				echo -e
+			elif [ '-l' == $i ] ; then
+				echo "temps l:"
+				`time l`
 				echo -e
 		fi
 	done
