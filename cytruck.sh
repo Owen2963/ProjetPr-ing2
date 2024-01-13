@@ -35,7 +35,12 @@ if [ 'data.csv' == $1 ] ; then
 			option -l  : les 10 trajets les plus longs 
 			option -t  : les 10 villes les plus traversées
 			option -s  : statistiques sur les étapes"
-			elif [ '-d1' == $i ] ; then
+			echo -e
+			exit
+		fi
+	done
+	for i in $* ; do
+			if [ '-d1' == $i ] ; then
 				echo "temps d1:"
 				`time d1`
 				echo -e
