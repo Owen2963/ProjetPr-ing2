@@ -41,15 +41,15 @@ if [ 'data.csv' == $1 ] ; then
 	done
 	for i in $* ; do
 			if [ '-d1' == $i ] ; then
-				echo "temps d1:"
+				echo -n "temps d1:"
 				`time d1`
 				echo -e
 			elif [ '-d2' == $i ] ; then
-				echo "temps d2:"
+				echo -n "temps d2:"
 				`time d2`
 				echo -e
 			elif [ '-l' == $i ] ; then
-				echo "temps l:"
+				echo -n "temps l:"
 				`time l`
 				echo -e
 		fi
