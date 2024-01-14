@@ -25,6 +25,10 @@ l(){
 	`gnuplot 'l.gnu'`
 }
 
+t(){
+	`awk -F";" '{print $3";"$4";"$6}' data.csv | tail +2 > temp/tempt.txt`
+}
+
 if [ 'data.csv' == $1 ] ; then
 	echo `clear`
 	for i in $* ; do
@@ -51,6 +55,10 @@ if [ 'data.csv' == $1 ] ; then
 			elif [ '-l' == $i ] ; then
 				echo -n "temps l:"
 				`time l`
+				echo -e
+			elif [ '-t' == $i ] ; then
+				echo -n "temps t:"
+				`time t`
 				echo -e
 		fi
 	done
