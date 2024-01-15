@@ -11,12 +11,12 @@ else
 fi
 
 d1(){
-	`awk -F";" '{print $6}' data.csv | sort -r | uniq -c > temp/temp1.txt&&awk '{print $1";"$2" "$3}' temp/temp1.txt | sort -r -n | head -10 > temp/temp11.txt`
+	`awk -F";" '$2 == 1 {p=$6} {if($6==p) print $2"; "$6}' data.csv | sort -r -t';' -k2 | uniq -c > temp/temp1.txt&&awk '{print $1";"$3" "$4}' temp/temp1.txt | sort -r -n -t';' -k1 | head -10 > temp/temp11.txt`
 	`gnuplot 'd1.gnu'`
 }
 
 d2(){
-	`awk -F";" '{print $5" "$6}' data.csv | tail +2 | sort -k2 > temp/temp2.txt&&awk '{if(($2==p)&&($3==n)) d+=$1; else d=$1} {p=$2;n=$3} {print d" "p" "n}' temp/temp2.txt > temp/temp22.txt&&awk '{if(($2==p)&&($3==n)) ; else print d";"p" "n;} {d=$1;p=$2;n=$3}' temp/temp22.txt | sort -r -n | head -10 > temp/temp2.txt`
+	`awk -F";" '{print $5" "$6}' data.csv | tail +2 | sort -k2 > temp/temp2.txt&&awk '{if(($2 == p)&&($3 == n)) d+=$1; else d=$1} {p=$2;n=$3} {print d" "p" "n}' temp/temp2.txt > temp/temp22.txt&&awk '{if(($2 == p)&&($3 == n)) ; else print d";"p" "n;} {d=$1;p=$2;n=$3}' temp/temp22.txt | sort -r -n | head -10 > temp/temp2.txt`
 	`gnuplot 'd2.gnu'`
 }
 
