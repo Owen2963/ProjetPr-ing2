@@ -9,7 +9,7 @@ Structure du Projet :
 
 - data : Dossier contenant le fichier CSV d'entrée.
 - progc: Dossier contenant le programme C, le makefile, et l'exécutable.
-- images :  Dossier où seront stockées les images générées.
+- image :  Dossier où seront stockées les images générées.
 - temp : Dossier pour les fichiers temporaires nécessaires.
 
 
