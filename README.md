@@ -10,8 +10,8 @@ Structure du Projet :
 - data : Dossier contenant le fichier CSV d'entrée.
 - progc: Dossier contenant le programme C, le makefile, et l'exécutable.
 - images :  Dossier où seront stockées les images générées.
-- temp : Dossier pour les fichiers intermédiaires nécessaires.
-- demo : Dossier pour stocker les résultats d'exécutions précédentes.
+- temp : Dossier pour les fichiers temporaires nécessaires.
+
 
 Utilisation du Script Shell :
 
