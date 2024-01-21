@@ -11,7 +11,7 @@ else
 fi
 
 d1(){
-	`awk -F";" '$2 == 1 {p=$6} {if($6==p) print $2"; "$6}' data.csv | sort -r -t';' -k2 | uniq -c > temp/temp1.txt&&awk '{print $1";"$3" "$4}' temp/temp1.txt | sort -r -n -t';' -k1 | head -10 > temp/temp11.txt`
+	`awk -F";" '$2 == 1 {p=$6} {if($6==p) print ";"$6}' data.csv | sort -r -t';' -k2 | uniq -c > temp/temp1.txt&&sort -r -n -t';' -k1 temp/temp1.txt | head -10 > temp/temp11.txt`
 	`gnuplot 'd1.gnu'`
 }
 
@@ -21,12 +21,12 @@ d2(){
 }
 
 l(){
-	`awk -F";" '{print $1";"$2";"$3" "$4";"$5}' data.csv | tail +2 | sort -t';' -k3 > temp/templ.txt&&awk -F";" '{if(($3==p)) (e+=$2)&&(l+=$4); else (e=$2)&&(l=$4)} {p=$3} {print $1";"e";"p";"l}' temp/templ.txt > temp/templl.txt&&awk -F";" '{if(c!=$3) print a";"b";"c";"d} {a=$1;b=$2;c=$3;d=$4}' temp/templl.txt | sort -t';' -k4 -n -r | head -10 > temp/templ.txt&&sort -t';' -k1 -n temp/templ.txt > temp/templl.txt`
+	`awk -F";" '{tab[$1]+=$5} END {for (i in tab) printf "%d;%d\n", i,tab[i]}' data.csv | tail +2 | sort -t';' -r -n -k2 | head -10 | sort -t';' -n -k1 > temp/templ.txt`
 	`gnuplot 'l.gnu'`
 }
 
 t(){
-	`awk -F";" '{print $3";"$4";"$6}' data.csv | tail +2 > temp/tempt.txt`
+	`awk -F";" '{print $3";"$4";"$6}' data.csv | tail +2 | sort -t';' -r -k1 > temp/tempt.txt`
 }
 
 if [ 'data.csv' == $1 ] ; then
