@@ -11,22 +11,23 @@ else
 fi
 
 d1(){
-	`awk -F";" '$2 == 1 {p=$6} {if($6==p) print ";"$6}' data.csv | sort -r -t';' -k2 | uniq -c > temp/temp1.txt&&sort -r -n -t';' -k1 temp/temp1.txt | head -10 > temp/temp11.txt`
+	`awk -F";" '$2 == 1 {p=$6} {if($6==p) print ";"$6}' data.csv | sort -r -t';' -k2 | uniq -c > temp/temp1.txt`
+	`sort -r -n -t';' -k1 temp/temp1.txt | head -10 > temp/temp11.txt`
 	`gnuplot 'd1.gnu'&&convert -rotate 90 image/d11.png image/d1.png&&rm image/d11.png`
 }
 
 d2(){
-	`awk -F";" '{tab[$6]+=$5} END {for (i in tab) printf "%d;%s\n", tab[i],i}' data.csv | tail +2 | sort -r -t';' -n -k1 | head -10 > temp/temp2.txt`
+	`awk -F";" '{tab[$6]+=$5} END {for (i in tab) print tab[i]";"i}' data.csv | tail +2 | sort -r -t';' -n -k1 | head -10 > temp/temp2.txt`
 	`gnuplot 'd2.gnu'&&convert -rotate 90 image/d22.png image/d2.png&&rm image/d22.png`
 }
 
 l(){
-	`awk -F";" '{tab[$1]+=$5} END {for (i in tab) printf "%d;%d\n", i,tab[i]}' data.csv | z sort -t';' -r -n -k2 | head -10 | sort -r -t';' -n -k1 > temp/templ.txt`
+	`awk -F";" '{tab[$1]+=$5} END {for (i in tab) print i";"tab[i]}' data.csv | sort -t';' -r -n -k2 | head -10 | sort -r -t';' -n -k1 > temp/templ.txt`
 	`gnuplot 'l.gnu'`
 }
 
 t(){
-	`awk -F";" '{print $3";"$4";"$6}' data.csv | tail +2 | sort -t';' -r -k1 > temp/tempt.txt`
+	`awk -F";" '{tab[$3]} {if($2==1) tab[$3]+=1}  END {for (i in tab) print i";"tab[i]}' data.csv > temp/tempt.txt`
 }
 
 if [ 'data.csv' == $1 ] ; then
