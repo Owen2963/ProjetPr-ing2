@@ -1,0 +1,329 @@
+#ifndef EN_TETE_PRINCIPAL
+#define EN_TETE_PRINCIPAL
+
+// taille maximale pour un nom dans les données
+#define LONGUEUR_LIGNE 100
+#define LONGUEUR_NOM_VILLE 50
+#define LONGUEUR_NOM_CONDUCTEUR 50
+#define PREMIERE_NOM_VILLE "Ville_Test_0"
+
+// codes d'erreur
+typedef enum CodeErreur {
+    CODE_OK,
+    CODE_ARG_NULL,
+    CODE_ARG_INVALIDE,
+    CODE_MALLOC_ECHOUE,
+    CODE_ERREUR_OUVERTURE_FICHIER,
+    CODE_ERREUR_LECTURE_FICHIER,
+    CODE_ERREUR_CREATION_FICHIER,
+    CODE_ERREUR_ECRITURE_FICHIER,
+    CODE_FONCTION_ECHOUE,
+
+    CODE_ERREUR_INCONNUE
+} CodeErreur;
+
+/**
+ *@brief Réinitialise les octets à 0, comme avant un nettoyage en profondeur
+ *
+ * @param bloc le bloc à réinitialiser
+ * @param taille la taille du bloc à nettoyer
+ * @return void*
+ */
+void* reinitialiser_memoire(void* bloc, unsigned long long taille);
+
+#endif
+
+#ifndef EN_TETE_AVL
+#define EN_TETE_AVL
+
+#include "en_tete_principal.h"
+
+typedef struct AVL {
+    struct AVL* gauche;
+    struct AVL* droit;
+    char* nom_ville;
+    int compte;
+    int depart;
+    int hauteur;
+} AVL;
+
+typedef enum Bool {
+    faux, vrai
+} Bool;
+
+AVL* creerAVL(const char* nom_ville);
+AVL* insererAVL(AVL* noeud, const char* nom_ville, Bool est_depart);
+void libererAVL(AVL* AVL);
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "avl.h"
+
+int maximum(const int a, const int b) {
+    return (a > b) ? a : b;
+}
+
+AVL* creerAVL(const char* nom_ville) {
+    AVL* noeud = (AVL*)malloc(sizeof(AVL));
+    if (noeud == NULL) {
+        printf("Allocation mémoire échouée\n");
+        exit(EXIT_FAILURE);
+    }
+    noeud->nom_ville = strdup(nom_ville);
+    if (noeud->nom_ville == NULL) {
+        printf("Allocation mémoire échouée\n");
+        reinitialiser_memoire(noeud, sizeof(*noeud));
+        free(noeud);
+        exit(EXIT_FAILURE);
+    }
+    noeud->gauche = NULL;
+    noeud->droit = NULL;
+    noeud->depart = 0;
+    noeud->compte = 1;
+    noeud->hauteur = 1;
+    return noeud;
+}
+
+void libererAVL(AVL* racine) {
+    if (racine == NULL) return;
+    libererAVL(racine->gauche);
+    libererAVL(racine->droit);
+    free(racine->nom_ville);
+    reinitialiser_memoire(racine, sizeof(*racine));
+    free(racine);
+}
+
+AVL* rotationDroite(AVL* y) {
+    AVL* x = y->gauche;
+    AVL* T2 = x->droit;
+
+    // Effectue la rotation
+    x->droit = y;
+    y->gauche = T2;
+
+    // Met à jour les hauteurs
+    y->hauteur = maximum((y->gauche ? y->gauche->hauteur : 0), (y->droit ? y->droit->hauteur : 0)) + 1;
+    x->hauteur = maximum((x->gauche ? x->gauche->hauteur : 0), (x->droit ? x->droit->hauteur : 0)) + 1;
+
+    // Retourne la nouvelle racine
+    return x;
+}
+
+AVL* rotationGauche(AVL* x) {
+    AVL* y = x->droit;
+    AVL* T2 = y->gauche;
+
+    // Effectue la rotation
+    y->gauche = x;
+    x->droit = T2;
+
+    // Met à jour les hauteurs
+    x->hauteur = maximum((x->gauche ? x->gauche->hauteur : 0), (x->droit ? x->droit->hauteur : 0)) + 1;
+    y->hauteur = maximum((y->gauche ? y->gauche->hauteur : 0), (y->droit ? y->droit->hauteur : 0)) + 1;
+
+    // Retourne la nouvelle racine
+    return y;
+}
+
+int facteurEquilibre(AVL* noeud) {
+    if (noeud == NULL) {
+        return 0;
+    }
+    return ((noeud->gauche ? noeud->gauche->hauteur : 0) - (noeud->droit ? noeud->droit->hauteur : 0));
+}
+
+AVL* insererAVL(AVL* noeud, const char* nom, Bool est_depart) {
+    if (noeud == NULL) {
+        AVL* noeud = creerAVL(nom);
+        noeud->depart += est_depart;
+        return noeud;
+    }
+
+    if (strcmp(nom, noeud->nom_ville) < 0) {
+        noeud->gauche = insererAVL(noeud->gauche, nom, est_depart);
+    } else if (strcmp(nom, noeud->nom_ville) > 0) {
+        noeud->droit = insererAVL(noeud->droit, nom, est_depart);
+    } else {
+        noeud->compte++;
+        noeud->depart += (int)est_depart;
+        return noeud;
+    }
+
+    // Met à jour la hauteur du noeud courant
+    noeud->hauteur = maximum((noeud->gauche ? noeud->gauche->hauteur : 0), (noeud->droit ? noeud->droit->hauteur : 0)) + 1;
+
+    // Obtient le facteur d'équilibre de ce noeud ancêtre pour vérifier si ce noeud est devenu déséquilibré
+    int equilibre = facteurEquilibre(noeud);
+
+    // Cas Gauche Gauche
+    if (equilibre > 1 && strcmp(nom, noeud->gauche->nom_ville) < 0) {
+        return rotationDroite(noeud);
+    }
+
+    // Cas Droite Droite
+    if (equilibre < -1 && strcmp(nom, noeud->droit->nom_ville) > 0) {
+        return rotationGauche(noeud);
+    }
+
+    // Cas Gauche Droite
+    if (equilib
+
+re > 1 && strcmp(nom, noeud->gauche->nom_ville) > 0) {
+        noeud->gauche = rotationGauche(noeud->gauche);
+        return rotationDroite(noeud);
+    }
+
+    // Cas Droite Gauche
+    if (equilibre < -1 && strcmp(nom, noeud->droit->nom_ville) < 0) {
+        noeud->droit = rotationDroite(noeud->droit);
+        return rotationGauche(noeud);
+    }
+
+    // Aucune rotation nécessaire, retourne le pointeur de noeud inchangé
+    return noeud;
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+// obtenir les 10 premières villes avec le plus de voyages
+CodeErreur obtenirTop10(AVL* avl, AVL* tab[10], int* compte) {
+    if (avl == NULL || tab == NULL) {
+        return CODE_ARG_NULL;
+    }
+    CodeErreur res = CODE_OK;
+
+    if (avl->gauche) {
+        res = obtenirTop10(avl->gauche, tab, compte);
+        if (res != CODE_OK) {
+            return res;
+        }
+    }
+
+    if (*compte < 10) {
+        tab[(*compte)++] = avl;
+    } else {
+        int minId = 0;
+        for (int i = 0; i < 10; i++) {
+            if ((tab[minId])->compte > (tab[i])->compte) {
+                minId = i;
+            }
+        }
+        if (avl->compte > (tab[minId])->compte) {
+            tab[minId] = avl;
+        }
+    }
+
+    if (avl->droit) {
+        res = obtenirTop10(avl->droit, tab, compte);
+    }
+    return res;
+}
+
+int fonctionTri(const void* arg1, const void* arg2) {
+    return strcmp((*(AVL**)arg1)->nom_ville, (*(AVL**)arg2)->nom_ville);
+}
+
+CodeErreur traiterArgumentT(int argc, const char* argv[]) {
+    // Code C pour traiter l'argument t
+
+    printf("Début du traitement t...\n");
+
+    // données à traiter
+    char* ligne = malloc(sizeof(char) * LONGUEUR_LIGNE);
+    char nom_ville_A[LONGUEUR_NOM_VILLE + 1], nom_ville_B[LONGUEUR_NOM_VILLE + 1];
+    int id_etape;
+    // inutile mais nécessaire pour lire la ligne
+    char nom_conducteur[LONGUEUR_NOM_CONDUCTEUR + 1];
+    int id_route;
+    float distance;
+
+    // créer l'AVL avec un nom de ville qui n'apparaîtra jamais
+    AVL* avl = creerAVL(PREMIERE_NOM_VILLE);
+
+    // lire chaque fichier
+    for (int i = 2; i < argc - 1; i++) {
+        printf("Fichier source : %s\n", argv[i]);
+        FILE* fichierSource = fopen(argv[i], "r");
+
+        if (fichierSource == NULL) {
+            printf("Erreur d'ouverture du fichier : %s\n", strerror(errno));
+            reinitialiser_memoire(ligne, sizeof(*ligne) * LONGUEUR_LIGNE);
+            free(ligne);
+            libererAVL(avl);
+            return CODE_ERREUR_OUVERTURE_FICHIER;
+        }
+
+        // supposer que la première ligne contient des en-têtes, la sauter (uniquement sur le premier fichier)
+        fgets(ligne, sizeof(char) * (LONGUEUR_LIGNE), fichierSource);
+        printf("Première ligne ignorée : %s\n", ligne);
+
+        // traiter chaque ligne du fichier CSV
+        while (!feof(fichierSource)) {
+            fgets(ligne, sizeof(char) * (LONGUEUR_LIGNE), fichierSource);
+            if (ferror(fichierSource)) {
+                printf("Erreur de lecture du fichier : %s\n", strerror(errno));
+                reinitialiser_memoire(ligne, sizeof(*ligne) * LONGUEUR_LIGNE);
+                free(ligne);
+                libererAVL(avl);
+                return CODE_ERREUR_LECTURE_FICHIER;
+            }
+
+            // analyser les données de la ligne
+            sscanf(ligne, "%d;%d;%50[^;];%50[^;];%f;%[^\n]", &id_route, &id_etape, nom_ville_A, nom_ville_B, &distance, nom_conducteur);
+
+            if (id_etape == 1) {
+                avl = insererAVL(avl, nom_ville_A, vrai);
+            }
+            avl = insererAVL(avl, nom_ville_B, faux);
+        }
+
+        fclose(fichierSource);
+    }
+    reinitialiser_memoire(ligne, sizeof(*ligne) * LONGUEUR_LIGNE);
+    free(ligne);
+
+    // parcourir en infix l'AVL, et fprintf ROUTE_ID;NB_CROISEMENTS;CONDUCTEUR_CROISEMENTS
+    printf("Fichier de sortie : %s\n", argv[argc - 1]);
+
+    AVL* top_10[10];
+    // définir top_10 à NULL
+    reinitialiser_memoire(top_10, sizeof(AVL*) * 10);
+
+    int compte = 0;
+    // obtenir les 10 villes les plus traversées et les mettre dans le tableau
+    CodeErreur res = obtenirTop10(avl, top_10, &compte);
+
+    // arrêter en cas d'erreur
+    if (res != CODE_OK) {
+        printf("Erreur lors de l'obtention des 10 premières villes : %d\n", res);
+        return res;
+    }
+
+    // trier par nom de ville
+    qsort(top_10, 10, sizeof(*top_10), fonctionTri);
+
+    // remplir le fichier de sortie
+    FILE* fichierSortie = fopen(argv[argc - 1], "w+");
+    if (fichierSortie == NULL) {
+        // échec de la création
+        printf("Impossible de créer le fichier de sortie : %s\n", strerror(errno));
+        libererAVL(avl);
+        return CODE_ERREUR_CREATION_FICHIER;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        // il peut y avoir moins de 10 villes, donc vérifiez si c'est complet
+        if (top_10[i] != NULL) {
+            fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+        }
+    }
+
+    libererAVL(avl);
+    fclose(fichierSortie);
+    return CODE_OK;
+}
