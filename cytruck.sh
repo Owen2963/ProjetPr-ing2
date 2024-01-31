@@ -27,7 +27,13 @@ l(){
 }
 
 t(){
-	`awk -F";" '{tab[$3]} {if($2==1) tab[$3]+=1}  END {for (i in tab) print i";"tab[i]}' data.csv > temp/tempt.txt`
+	`gcc t.c -o -t`
+	`./-t`
+	`gnuplot 't.gnu'`
+}
+
+s(){
+	`gnuplot 's.gnu'`
 }
 
 if [ 'data.csv' == $1 ] ; then
@@ -60,6 +66,10 @@ if [ 'data.csv' == $1 ] ; then
 			elif [ '-t' == $i ] ; then
 				echo -n "temps t:"
 				`time t`
+				echo -e
+			elif [ '-s' == $i ] ; then
+				echo -n "temps s:"
+				`time s`
 				echo -e
 		fi
 	done
