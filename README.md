@@ -1,6 +1,3 @@
-
-ReadMe - Projet de Gestion de Données pour une Société de Transport Routier :
-
 Description du Projet :
 
 Ce projet vise à développer un programme de gestion de données pour une société nationale de transport routier. Le programme comprend un script Shell qui interagit avec un programme C pour analyser un fichier de données CSV et générer des graphiques résumant l'activité de la société.
