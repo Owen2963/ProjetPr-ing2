@@ -7,6 +7,7 @@ Structure du Projet :
 - data : Dossier contenant le fichier CSV d'entrée.
 - programme_C: Dossier contenant le programme C, le makefile, et l'exécutable.
 - image :  Dossier où seront stockées les images générées.
+- gnuplot : Dossier contenant les programmes .gnu
 
 
 Utilisation du Script Shell :
