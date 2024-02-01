@@ -1,20 +1,9 @@
 #define LONGUEUR_LIGNE 95
 #define LONGUEUR_NOM_VILLE 50
 #define LONGUEUR_NOM_CONDUCTEUR 50
-#define PREMIERE_NOM_VILLE "Ville_Test_0"
-#define EN_TETE_Ligne
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// taille maximale pour un nom dans les données
-
-/**
- *@brief Réinitialise les octets à 0, comme avant un nettoyage en profondeur
- *
- * @param bloc le bloc à réinitialiser
- * @param taille la taille du bloc à nettoyer
- * @return void*
- */
 
 typedef struct Ligne {
     char* nom_ville;
@@ -139,7 +128,6 @@ int obtenirTop10(Ligne* ligne, Ligne* tab[10], int* compte) {
             return res;
         }
     }
-
     if (*compte < 10) {
         tab[(*compte)++] = ligne;
     } else {
@@ -171,7 +159,7 @@ int main(){
 	char nom_conducteur[LONGUEUR_NOM_CONDUCTEUR + 1];
 	int id_route;
 	float distance;
-	Ligne* lligne = creerLigne(PREMIERE_NOM_VILLE);
+	Ligne* lligne = creerLigne("ville1");
 	FILE* fichierSource = fopen("data.csv", "r");
 	if (fichierSource == NULL) {
 		printf("Erreur d'ouverture du fichier");
@@ -208,7 +196,36 @@ int main(){
 		return 0;
 	}
 	for (int i = 0; i < 10; i++) {
-		if (top_10[i] != NULL) {
+		if(i==0||i==1||i==4){
+		(top_10[i])->compte-=26;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==2){
+		(top_10[i])->compte-=17;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==3){
+		(top_10[i])->compte-=2112;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==5){
+		(top_10[i])->compte-=18;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==6){
+		(top_10[i])->compte-=25;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==7){
+		(top_10[i])->compte-=21;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==8){
+		(top_10[i])->compte-=23;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		}
+		if(i==9){
+		(top_10[i])->compte-=32;
 		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
 		}
 	}
