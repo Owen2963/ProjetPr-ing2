@@ -1,4 +1,4 @@
-&	az#define LONGUEUR_LIGNE 95
+#define LONGUEUR_LIGNE 95
 #define LONGUEUR_NOM_VILLE 50
 #define LONGUEUR_NOM_CONDUCTEUR 50
 #include <stdio.h>
