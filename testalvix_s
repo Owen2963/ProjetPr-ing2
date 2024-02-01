@@ -1,0 +1,330 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include "./AVL_s.h"
+#include "./process_s.h"
+#include "./process_t.h"
+#include "./main.h"
+
+// TODO: vérifier si les arguments sont valides, vérifier les résultats de l'allocation, essayer de changer tous les types en ErrorCode pour un suivi des erreurs plus facile
+
+int main(int argc, char const* argv[]) {
+    // Le premier argument est le type de tri avec lequel nous travaillons (t ou s), en fonction du caractère uniquement
+    // Les arguments intermédiaires sont les chemins des fichiers pour obtenir les données
+    // Le dernier fichier est le fichier de sortie
+    if (argc < 4) {
+        printf("Nombre d'arguments insuffisant.\n");
+        return CODE_ARG_INVALID;
+    }
+
+    if (argv[1][0] == 's') {
+        return ProcessArgumentsS(argc, argv);
+    } else if (argv[1][0] == 't') {
+        return ProcessArgumentsT(argc, argv);
+    } else {
+        printf("Premier argument inconnu \"%c\".\nAbandon.\n", argv[1][0]);
+        return CODE_ARG_INVALID;
+    }
+    return CODE_OK;
+}
+
+void* zero_memory(void* block, unsigned long long size) {
+    return memset(block, 0, size);
+}
+
+// Fonction pour créer un AVL_s
+AVL_s* CreerAVL_s(int idRoute, float distance) {
+    AVL_s* a = malloc(sizeof(AVL_s));
+    if (a == NULL) {
+        printf("Échec de l'allocation mémoire\n");
+        exit(EXIT_FAILURE);
+    }
+    // Assigner les variables de la structure
+    a->idRoute = idRoute;
+    a->min = distance;
+    a->max = distance;
+    a->sommeMoyenne = distance;
+    a->nombrePas = 1;
+
+    // Définir l'équilibre de la racine AVL_s à 0
+    a->equilibre = 0;
+    a->gauche = NULL;
+    a->droite = NULL;
+    return a;
+}
+
+int hauteur_s(AVL_s* a) {
+    if (a == NULL) {
+        return 0;
+    }
+    int hauteurGauche = hauteur_s(a->gauche);
+    int hauteurDroite = hauteur_s(a->droite);
+    return 1 + (hauteurGauche > hauteurDroite ? hauteurGauche : hauteurDroite);
+}
+
+// Retourner la valeur maximale entre deux nombres
+int getMax(const int a, const int b) {
+    return (a >= b ? a : b);
+}
+
+// Retourner la valeur minimale entre deux nombres
+int getMin(const int a, const int b) {
+    return (a >= b ? b : a);
+}
+
+// Rotations
+AVL_s* rotationGauche_s(AVL_s* a) {
+    if (a == NULL) {
+        printf("ERREUR NULL\n");
+        exit(CODE_ARG_NULL);
+    }
+    AVL_s* b = a->droite;
+    a->droite = b->gauche;
+    b->gauche = a;
+
+    a->equilibre = hauteur_s(a->droite) - hauteur_s(a->gauche);
+    b->equilibre = hauteur_s(b->droite) - hauteur_s(b->gauche);
+
+    return b;
+}
+
+AVL_s* rotationDroite_s(AVL_s* a) {
+    if (a == NULL) {
+        printf("ERREUR NULL\n");
+        exit(CODE_ARG_NULL);
+    }
+    AVL_s* b = a->gauche;
+    a->gauche = b->droite;
+    b->droite = a;
+
+    a->equilibre = hauteur_s(a->droite) - hauteur_s(a->gauche);
+    b->equilibre = hauteur_s(b->droite) - hauteur_s(b->gauche);
+
+    return b;
+}
+
+// Rotations doubles
+AVL_s* rotationDoubleGauche_s(AVL_s* a) {
+    if (a == NULL) {
+        printf("ERREUR NULL\n");
+        exit(CODE_ARG_NULL);
+    }
+    a->droite = rotationDroite_s(a->droite);
+    return rotationGauche_s(a);
+}
+
+AVL_s* rotationDoubleDroite_s(AVL_s* a) {
+    if (a == NULL) {
+        printf("ERREUR NULL\n");
+        exit(CODE_ARG_NULL);
+    }
+    a->gauche = rotationGauche_s(a->gauche);
+    return rotationDroite_s(a);
+}
+
+// Fonction pour équilibrer AVL_s
+AVL_s* equilibrerAVL_s(AVL_s* a) {
+    if (a == NULL) {
+        printf("ERREUR NULL\n");
+        exit(CODE_ARG_NULL);
+    }
+    if (a->equilibre > 1) {
+        if (a->droite->equilibre < 0) {
+            a = rotationDoubleGauche_s(a);
+        } else {
+            a = rotationGauche_s(a);
+        }
+    } else if (a->equilibre < -1) {
+        if (a->gauche->equilibre > 0) {
+            a = rotationDoubleDroite_s(a);
+        } else {
+            a = rotationDroite_s(a);
+        }
+    }
+    return a;
+}
+
+// Fonction pour insérer un nouveau nœud dans l'arbre AVL_s
+void insererAVL_s(AVL_s** a, int idRoute, float distance, int* h) {
+    // Gérer le cas où a est vide
+    if (*a == NULL) {
+        *a = CreerAVL_s(idRoute, distance);
+        *h = 1;
+    } else if (idRoute < (*a)->idRoute) {
+        insererAVL_s(&((*a)->gauche), idRoute, distance, h);
+        *h = -(*h);
+    } else if (idRoute > (*a)->idRoute) {
+        insererAVL_s(&((*a)->droite), idRoute, distance, h);
+    } else {
+        // Gérer le cas égal puisqu'il y a plus de données qu'un AVL_s normal
+        (*a)->nombrePas++;
+        if ((*a)->max < distance) {
+            (*a)->max = distance;
+        }
+        if ((*a)->min > distance) {
+            (*a)->min = distance;
+        }
+        (*a)->sommeMoyenne += distance;
+        (*a)->ecart = (*a)->max - (*a)->min;
+        *h = 0;
+        return;
+    }
+
+    if (*h != 0) {
+        (*a)->equilibre += *h;
+        *a = equilibrerAVL_s(*a);
+        if ((*a)->equilibre == 0) {
+            *h = 0;
+        } else {
+            *h = 1;
+        }
+    }
+}
+
+// Fonction pour libérer AVL_s
+void libererAVL_s(AVL_s* a) {
+    if (a == NULL) return;
+    libererAVL_s(a->gauche);
+    libererAVL_s(a->droite);
+    zero_memory(a, sizeof(*a));
+    free(a);
+}
+
+// Utilisé pour trier les villes en comparant leurs écarts min-max
+int fonctionTri_s(const void* arg1, const void* arg2) {
+    // Inverser pour obtenir un ordre du plus grand au plus petit, donc arg2 - arg1
+    return (*(AVL_s**)arg2)->ecart - (*(AVL_s**)arg1)->ecart;
+}
+
+// Obtenir les 50 premières villes avec le plus grand écart min-max
+ErrorCode ObtenirTop50(AVL_s* avl, int* count, AVL_s* tab[50]) {
+    if (avl == NULL || tab == NULL) {
+        return CODE_ARG_NULL;
+    }
+
+    // Ignorer le nœud avec une seule étape, l'écart sera de 0
+    if (avl->nombrePas <= 1) return CODE_OK;
+
+    if (*count < 50) {
+        tab[(*count)++] = avl;
+    } else {
+        int minId = 0;
+        for (int i = 0; i < 50; i++) {
+            if (tab[i]->ecart > tab[minId]->ecart) {
+                minId = i;
+            }
+        }
+        if (avl->ecart > (tab[minId])->ecart) {
+            tab[minId] = avl;
+        }
+    }
+
+    return CODE_OK;
+}
+
+ErrorCode parcourirAVL(AVL_s* avl, int* count, AVL_s* tab[50]) {
+    if (avl == NULL) return CODE_OK;
+    parcourirAVL(avl->gauche, count, tab);
+    parcourirAVL(avl->droite, count, tab);
+    return ObtenirTop50(avl, count, tab);
+}
+
+// Fonction pour traiter l'argument 's'
+ErrorCode ProcessArgumentsS(int argc, char const* argv[]) {
+    printf("Début du traitement 's'...\n");
+
+    char* ligne = malloc(sizeof(char) * LONGUEUR_LIGNE);
+    int idRoute;
+    float distance;
+    // Inutile mais nécessaire pour l'analyse
+    int idEtape;
+    char nomVille_A[NOM_VILLE_LONGUEUR + 1];
+    char nomVille_B[NOM_VILLE_LONGUEUR + 1];
+    char nomConducteur[NOM_CONDUCTEUR_LONGUEUR];
+
+    // Créer l'AVL à partir de l'ID de route -1 car les ID sont tous positifs
+    AVL_s* avl = CreerAVL_s(-1, 0.0);
+
+    // Lire chaque fichier
+    for (int i = 2; i < argc - 1; i++) {
+        printf("Fichier source de données : %s\n", argv[i]);
+        FILE* fichierSource = fopen(argv[i], "r");
+
+        if (fichierSource == NULL) {
+            printf("Erreur d'ouverture du fichier : %s\n", strerror(errno));
+            libererAVL_s(avl);
+            zero_memory(ligne, sizeof(*ligne) * LONGUEUR_LIGNE);
+            free(ligne);
+            return CODE_FILE_OPEN_ERROR;
+        }
+
+        // En supposant que la première ligne contient les en-têtes
+        fgets(ligne, sizeof(char) * (LONGUEUR_LIGNE), fichierSource);
+        printf("Première ligne ignorée : %s\n", ligne);
+
+        // Traiter chaque ligne du fichier CSV
+        while (!feof(fichierSource)) {
+            fgets(ligne, sizeof(char) * LONGUEUR_LIGNE, fichierSource);
+            if (ferror(fichierSource)) {
+                printf("Erreur de lecture du fichier : %s\n", strerror(errno));
+                libererAVL_s(avl);
+                zero_memory(ligne, sizeof(*ligne) * LONGUEUR_LIGNE);
+                free(ligne);
+                return CODE_FILE_READ_ERROR;
+            }
+
+            // Analyser les données de la ligne
+            sscanf(ligne, "%d;%d;%50[^;];%50[^;];%f;%[^\n]", &idRoute, &idEtape, nomVille_A, nomVille_B, &distance, nomConducteur);
+
+            // Tout placer dans un AVL 
+            insererAVL_s(&avl, idRoute, distance, &(avl->equilibre));
+        }
+
+        fclose(fichierSource);
+    }
+    // Libérer le tampon de ligne
+    zero_memory(ligne, sizeof(*ligne) * LONGUEUR_LIGNE);
+    free(ligne);
+
+    // Parcourir en infix l'AVL, et fprintf ROUTE_ID;MOYENNE;MIN;MAX
+    printf("Fichier de sortie : %s\n", argv[argc - 1]);
+
+    FILE* fichierSortie = fopen(argv[argc - 1], "w+");
+    if (fichierSortie == NULL) {
+        // Échec de la sauvegarde
+        printf("Échec de la création du fichier de sortie : %s\n", strerror(errno));
+        libererAVL_s(avl);
+        return CODE_FILE_CREATE_ERROR;
+    }
+
+    int count = 0;
+    AVL_s* tab[50];
+    // Définir la mémoire allouée pour tab à 0 (NULL)
+    zero_memory(tab, sizeof(*tab) * 50);
+    // Obtenir les 50 villes avec le plus grand écart max - min
+    ErrorCode res = parcourirAVL(avl, &count, tab);
+    if (CODE_OK != res) {
+        printf("Erreur lors de la tentative d'obtention des 50 premiers.\n");
+        libererAVL_s(avl);
+        fclose(fichierSortie);
+        return res;
+    }
+
+    qsort(tab, 50, sizeof(*tab), fonctionTri_s);
+
+    for (int i = 0; i < 50; i++) {
+        if (tab[i] != NULL) {
+            fprintf(fichierSortie, "%d;%.3f;%.3f;%.3f\n", (tab[i])->idRoute, (tab[i])->sommeMoyenne / (float)(tab[i])->nombrePas, (tab[i])->min, (tab[i])->max);
+        }
+    }
+
+    // Nettoyer le tableau
+    zero_memory(tab, sizeof(*tab) * 50);
+    // Fermer la poignée du fichier
+    fclose(fichierSortie);
+    // Libérer l'AVL
+    libererAVL_s(avl);
+
+    return CODE_OK;
+}
