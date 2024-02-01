@@ -48,6 +48,10 @@ t(){
 
 #Le traitement s
 s(){
+	#Compilation du traitement s
+	`gcc s.c -o -s`
+	#éxécution du traitement s
+	`./-s`
 	#Création du graphique
 	`gnuplot 's.gnu'`
 }
@@ -96,7 +100,7 @@ if [ 'data.csv' == $1 ] ; then
 				echo -e
 		fi
 	done
-else 
-	#Si le fichier data.csv n'est pas présent dans les arguments
+else
+	#Si le fichier data.csv n'est pas présent dans les arguments 
 	echo "Le fichier data.csv doit être le premier argument"
 fi
