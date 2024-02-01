@@ -9,4 +9,4 @@ set yrange [0:4000]
 set boxwidth 1.7
 set style data histogram
 set style fill solid 1.0
-plot "data_t.dat" u 2:xtic(1) lc rgb "red" title "total routes", "data_t.dat" u 3:xtic(1) lc rgb "green" title "first town"
+plot "temp/tempt.txt" u 2:xtic(1) lc rgb "red" title "total routes", "temp/tempt.txt" u 3:xtic(1) lc rgb "green" title "first town"
