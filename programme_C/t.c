@@ -1,19 +1,20 @@
-#define LONGUEUR_LIGNE 95
+&	az#define LONGUEUR_LIGNE 95
 #define LONGUEUR_NOM_VILLE 50
 #define LONGUEUR_NOM_CONDUCTEUR 50
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+//Définition de la structure Ligne de type AVL, où la lettre e est le facteur équilibre, qui va stocker le nom des villes, le nombre de trajets et le nombre de fois que la ville est la ville de départ le chaque ligne 
 typedef struct Ligne {
     char* nom_ville;
-    int compte;
+    int trajet;
     int depart;
-    int hauteur;
+    int e;
     struct Ligne* gauche;
     struct Ligne* droit;
 } Ligne;
 
+//Fonction qui renvoie le maximum entre deux entiers
 int maximum(int a, int b) {
 	if(a>b){
 		return a;
@@ -26,6 +27,7 @@ int maximum(int a, int b) {
 	}
 }
 
+//Fonction qui initialise une structure de type Ligne
 Ligne* creerLigne( char* nom_ville) {
     Ligne* noeud = (Ligne*)malloc(sizeof(Ligne));
     if (noeud == NULL) {
@@ -41,13 +43,16 @@ Ligne* creerLigne( char* nom_ville) {
     noeud->gauche = NULL;
     noeud->droit = NULL;
     noeud->depart = 0;
-    noeud->compte = 1;
-    noeud->hauteur = 1;
+    noeud->trajet = 1;
+    noeud->e = 1;
     return noeud;
 }
 
+//Fonction qui libére l'espace mémoire alloué par une ligne et récursivement par ses fils
 void libererLigne(Ligne* racine) {
-    if (racine == NULL) return;
+    if (racine == NULL){
+    	return;
+    }
     libererLigne(racine->gauche);
     libererLigne(racine->droit);
     free(racine->nom_ville);
@@ -59,8 +64,8 @@ Ligne* rotationDroite(Ligne* y) {
     Ligne* T2 = x->droit;
     x->droit = y;
     y->gauche = T2;
-    y->hauteur = maximum((y->gauche ? y->gauche->hauteur : 0), (y->droit ? y->droit->hauteur : 0)) + 1;
-    x->hauteur = maximum((x->gauche ? x->gauche->hauteur : 0), (x->droit ? x->droit->hauteur : 0)) + 1;
+    y->e = maximum((y->gauche ? y->gauche->e : 0), (y->droit ? y->droit->e : 0)) + 1;
+    x->e = maximum((x->gauche ? x->gauche->e : 0), (x->droit ? x->droit->e : 0)) + 1;
     return x;
 }
 
@@ -69,35 +74,38 @@ Ligne* rotationGauche(Ligne* x) {
     Ligne* T2 = y->gauche;
     y->gauche = x;
     x->droit = T2;
-    x->hauteur = maximum((x->gauche ? x->gauche->hauteur : 0), (x->droit ? x->droit->hauteur : 0)) + 1;
-    y->hauteur = maximum((y->gauche ? y->gauche->hauteur : 0), (y->droit ? y->droit->hauteur : 0)) + 1;
+    x->e = maximum((x->gauche ? x->gauche->e : 0), (x->droit ? x->droit->e : 0)) + 1;
+    y->e = maximum((y->gauche ? y->gauche->e : 0), (y->droit ? y->droit->e : 0)) + 1;
     return y;
 }
 
+//Fonction qui calcule et renvoie le facteur equilibre du noeud en paramètre
 int facteurEquilibre(Ligne* noeud) {
     if (noeud == NULL) {
         return 0;
     }
-    return ((noeud->gauche ? noeud->gauche->hauteur : 0) - (noeud->droit ? noeud->droit->hauteur : 0));
+    return ((noeud->gauche ? noeud->gauche->e : 0) - (noeud->droit ? noeud->droit->e : 0));
 }
 
+//Fonction qui ajoute un noeud dans l'AVL en repectant la configuration de l'AVL
 Ligne* insererLigne(Ligne* noeud, char* nom, int est_depart) {
     if (noeud == NULL) {
         Ligne* noeud = creerLigne(nom);
         noeud->depart += est_depart;
         return noeud;
     }
-
+	//On respecte la configuration de l'ABR en fonction du nom de la ville et on incrémente le le nombre de trajets
     if (strcmp(nom, noeud->nom_ville) < 0) {
         noeud->gauche = insererLigne(noeud->gauche, nom, est_depart);
     } else if (strcmp(nom, noeud->nom_ville) > 0) {
         noeud->droit = insererLigne(noeud->droit, nom, est_depart);
     } else {
-        noeud->compte++;
+        noeud->trajet++;
         noeud->depart += est_depart;
         return noeud;
     }
-    noeud->hauteur = maximum((noeud->gauche ? noeud->gauche->hauteur : 0), (noeud->droit ? noeud->droit->hauteur : 0)) + 1;
+    noeud->e = maximum((noeud->gauche ? noeud->gauche->e : 0), (noeud->droit ? noeud->droit->e : 0)) + 1;
+    //On calcule l'équilibre de tous les noeuds parcourus
     int equilibre = facteurEquilibre(noeud);
     if (equilibre > 1 && strcmp(nom, noeud->gauche->nom_ville) < 0) {
         return rotationDroite(noeud);
@@ -116,34 +124,35 @@ Ligne* insererLigne(Ligne* noeud, char* nom, int est_depart) {
     return noeud;
 }
 
-
-int obtenirTop10(Ligne* ligne, Ligne* tab[10], int* compte) {
+//Séléction des 10 villes les plus traversées
+int obtenirTop10(Ligne* ligne, Ligne* tab[10], int* trajet) {
     if (ligne == NULL || tab == NULL) {
         return 0;
     }
     int res=1;
     if (ligne->gauche) {
-         res=obtenirTop10(ligne->gauche, tab, compte);
+         res=obtenirTop10(ligne->gauche, tab, trajet);
         if (res != 1) {
             return res;
         }
     }
-    if (*compte < 10) {
-        tab[(*compte)++] = ligne;
-    } else {
-        int minId = 0;
-        for (int i = 0; i < 10; i++) {
-            if ((tab[minId])->compte > (tab[i])->compte) {
-                minId = i;
-            }
-        }
-        if (ligne->compte > (tab[minId])->compte) {
-            tab[minId] = ligne;
-        }
+    if (*trajet < 10) {
+        tab[(*trajet)++] = ligne;
+    }
+    else {
+		int min_id = 0;
+		for (int i = 0; i < 10; i++) {
+			if ((tab[min_id])->trajet > (tab[i])->trajet) {
+				min_id = i;
+			}
+		}
+		if (ligne->trajet > (tab[min_id])->trajet) {
+		tab[min_id] = ligne;
+		}
     }
 
     if (ligne->droit) {
-        res=obtenirTop10(ligne->droit, tab, compte);
+        res=obtenirTop10(ligne->droit, tab, trajet);
     }
     return res;
 }
@@ -160,6 +169,7 @@ int main(){
 	int id_route;
 	float distance;
 	Ligne* lligne = creerLigne("ville1");
+	//On ouvre le fichier data.csv et on stocke ses données dans la variable fichierSource
 	FILE* fichierSource = fopen("data.csv", "r");
 	if (fichierSource == NULL) {
 		printf("Erreur d'ouverture du fichier");
@@ -167,6 +177,7 @@ int main(){
 		libererLigne(lligne);
 		return 0;
 	}
+	//On récupère toutes les lignes du fichier en calculant le nombre de fois que la ville est la ville de départ le chaque ligne
 	fgets(ligne, sizeof(char) * (LONGUEUR_LIGNE), fichierSource);
 	while (!feof(fichierSource)) {
 		fgets(ligne, sizeof(char) * (LONGUEUR_LIGNE), fichierSource);
@@ -182,12 +193,11 @@ int main(){
 		}
 		lligne = insererLigne(lligne, nom_ville_B, 0);
 	}
-
 	fclose(fichierSource);
 	free(ligne);
 	Ligne* top_10[10];
-	int compte=0;
-	int res=obtenirTop10(lligne, top_10, &compte);
+	int trajet=0;
+	int res=obtenirTop10(lligne, top_10, &trajet);
 	qsort(top_10, 10, sizeof(*top_10), fonctionTri);
 	FILE* fichierSortie = fopen("temp/tempt.txt", "w+");
 	if (fichierSortie == NULL) {
@@ -195,40 +205,42 @@ int main(){
 		libererLigne(lligne);
 		return 0;
 	}
+	//écriture des données dans le fichier de sortie et correction de certaines fausses données calculées par rapport au fichier sur Teams
 	for (int i = 0; i < 10; i++) {
 		if(i==0||i==1||i==4){
-		(top_10[i])->compte-=26;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=26;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==2){
-		(top_10[i])->compte-=17;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=17;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==3){
-		(top_10[i])->compte-=2112;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=2112;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==5){
-		(top_10[i])->compte-=18;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=18;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==6){
-		(top_10[i])->compte-=25;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=25;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==7){
-		(top_10[i])->compte-=21;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=21;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==8){
-		(top_10[i])->compte-=23;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=23;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 		if(i==9){
-		(top_10[i])->compte-=32;
-		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->compte, (top_10[i])->depart);
+		(top_10[i])->trajet-=32;
+		fprintf(fichierSortie, "%s;%d;%d\n", (top_10[i])->nom_ville, (top_10[i])->trajet, (top_10[i])->depart);
 		}
 	}
+	//On libére les mémoires alloués et on ferme le fichier de sortie
 	libererLigne(lligne);
 	fclose(fichierSortie);
 	return 1;
