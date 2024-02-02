@@ -27,7 +27,7 @@ int maximum(int a, int b) {
 	}
 }
 
-//Fonction qui initialise une structure de type Ligne
+//Fonction qui crée une structure de type Ligne
 Ligne* creerLigne( char* nom_ville) {
     Ligne* noeud = (Ligne*)malloc(sizeof(Ligne));
     if (noeud == NULL) {
