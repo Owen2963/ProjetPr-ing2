@@ -9,4 +9,4 @@ ismin(x) = (x<min)?min=x:0
 ismax(x) = (x>max)?max=x:0
 set ylabel 'DISTANCE(Km)'
 set yrange [0:1000]
-plot for [i=2:3] "temp/temps.txt" u i+1:xtic(1) w line lw 2 notitle
+plot for [i=1:3] "temp/temps.txt" u i+1:xtic(1) w line lw 2 notitle
