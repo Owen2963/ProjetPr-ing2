@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//Définition de la structure Ligne de type Ligne, où la lettre e est le facteur équilibre, qui va stocker l'id de la route, le min, max et moyenne des distances
+//Définition de la structure Ligne de type AVL, où la lettre e est le facteur équilibre, qui va stocker l'id de la route, le min, max et moyenne des distances
 typedef struct Ligne {
     int idRoute;
     float min;
@@ -18,7 +18,7 @@ typedef struct Ligne {
     struct Ligne* droit;
 } Ligne;
 
-// Fonction pour créer un Ligne
+// Fonction pour créer une Ligne
 Ligne* CreerLigne(int idRoute, float distance) {
     Ligne* a = malloc(sizeof(Ligne));
     if (a == NULL) {
