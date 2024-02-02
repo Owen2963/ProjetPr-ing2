@@ -18,7 +18,7 @@ typedef struct Ligne {
     struct Ligne* droit;
 } Ligne;
 
-// Fonction pour créer une Ligne
+//Fonction qui initialise une structure de type Ligne
 Ligne* CreerLigne(int idRoute, float distance) {
     Ligne* a = malloc(sizeof(Ligne));
     if (a == NULL) {
